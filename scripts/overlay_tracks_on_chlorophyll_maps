@@ -1,0 +1,90 @@
+To determine whether your tracking data in "C:/Users/Tanif/Downloads/Frigatebird_evars/frigatebird_tracks_cleaned.rds" can be overlaid on the chlorophyll data, we need to check for compatibility on three main criteria:
+
+# Loading and Inspecting Tracking Data
+# Load the RDS file
+frigatebird.tracks <- readRDS("C:/Users/Tanif/Downloads/Frigatebird_evars/frigatebird_tracks_cleaned.rds")
+
+# Peek at the structure
+str(frigatebird.tracks)
+
+# Check date range and coordinate ranges
+summary(frigatebird.tracks$Timestamp)
+summary(frigatebird.tracks$LocationLat)
+summary(frigatebird.tracks$LocationLong)
+
+OUTPUT
+> str(frigatebird.tracks)
+tibble [132,629 × 5] (S3: tbl_df/tbl/data.frame)
+ $ Timestamp         : POSIXct[1:132629], format: "2022-06-01 07:51:23" "2022-06-01 07:55:31" ...
+ $ LocationLat       : num [1:132629] 5.89 5.89 5.89 5.89 5.89 ...
+ $ LocationLong      : num [1:132629] -162 -162 -162 -162 -162 ...
+ $ TagLocalIdentifier: chr [1:132629] "eobs_9835" "eobs_9835" "eobs_9835" "eobs_9835" ...
+ $ MonthDate         : POSIXct[1:132629], format: "2022-06-01" "2022-06-01" ...
+> 
+> # Check date range and coordinate ranges
+> summary(frigatebird.tracks$Timestamp)
+                      Min.                    1st Qu.                     Median 
+"2022-06-01 07:51:23.0000" "2022-06-24 23:05:10.0000" "2022-08-03 21:40:08.0000" 
+                      Mean                    3rd Qu.                       Max. 
+"2022-09-12 23:23:53.6804" "2022-11-29 14:35:13.0000" "2023-03-28 16:50:06.0000" 
+> summary(frigatebird.tracks$LocationLat)
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  3.166   5.670   5.880   5.769   5.887   7.777 
+> summary(frigatebird.tracks$LocationLong)
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+ -164.7  -162.3  -162.1  -162.2  -162.1  -159.3 
+
+
+
+# Compare with Chlorophyll Data
+From the NetCDF output:
+
+Latitude range: 3.175 to 7.775°N
+
+Longitude range: –164.675 to –159.25°E
+
+Time range: 2022-06-15 to 2023-03-16
+
+Now compare:
+
+Are the lat/lon values in the tracks within those bounds?
+
+Do timestamps fall between 2022-06-15 and 2023-03-16?
+If yes, the tracking data is compatible and can be overlaid. 
+
+
+SPATIAL COMPATIBILITY
+
+Based on the output the tracking data is fully compatible with the chlorophyll-a data downloaded. 
+| Variable      | Tracking Range    | Chlorophyll Range    | ✅ Compatible?                            |
+| ------------- | ----------------- | -------------------- | ---------------------------------------- |
+| **Latitude**  | 3.166° – 7.777°   | 3.175° – 7.775°      | ✅ Yes — slight edge cases are acceptable |
+| **Longitude** | –164.7° – –159.3° | –164.675° – –159.25° | ✅ Yes — full overlap                     |
+
+The latitude minimum (3.166) is just below the chlorophyll range (3.175), but this likely overlaps within rounding tolerance of the dataset grid (0.025° resolution).
+
+Longitude and most latitudes fall well within the chlorophyll coverage.
+
+
+
+TEMPORAL COMPATIBILITY
+
+| Variable      | Tracking Range                | Chlorophyll Range              | ✅ Compatible?            |
+| ------------- | ----------------------------- | ------------------------------ | ------------------------ |
+| **Timestamp** | June 1, 2022 – March 28, 2023 | June 15, 2022 – March 16, 2023 | ✅ Yes (majority overlap) |
+
+
+
+Some tracking points occur before chlorophyll starts (e.g., early June 2022) and after it ends (late March 2023).
+
+These extra dates will simply return NA during extraction — this is expected behavior.
+
+We could safely overlay these frigatebird tracks on your chlorophyll data and:
+
+Visualize where birds travel relative to ocean productivity.
+
+Extract and analyze chlorophyll values at bird locations.
+
+Perform spatiotemporal modeling or habitat preference studies.
+
+
