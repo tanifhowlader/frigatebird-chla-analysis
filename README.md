@@ -29,25 +29,6 @@ This project enriches GPS tracking data of frigatebirds with satellite-derived e
 - Dataset ID: `erdMBchlamday_LonPM180`
 - Accessed via `rerddap` and `rerddapXtracto` packages
 
----
-
-## Required R Packages
-
-```r
-library(ggplot2)
-library(dplyr)
-library(viridis)
-library(rerddap)
-library(rerddapXtracto)
-library(raster)
-library(lubridate)
-library(sp)
-
-
-# Install missing packages:
-install.packages(c("ggplot2", "dplyr", "viridis", "raster", "lubridate", "sp"))
-# Use remotes::install_github() if rerddapXtracto is not on CRAN
-
 ## Workflow Overview
 
 | Step | Description                                                         |
@@ -67,10 +48,10 @@ Map of all frigatebird tracks by individual bird ID
 Chlorophyll-a concentration overlaid on a selected track, highlighting productivity zones
 
 
-## Data Description
-Raw Data Source
+📁 Data Description
+🔗 Raw Data Source
 All frigatebird tracking data originate from:
-Movebank: DataOne Repository - 10.24431/rw1k8ez
+Movebank: DataOne Repository – 10.24431/rw1k8ez
 This dataset includes GPS tracking of Great Frigatebirds (Fregata minor) in the Pacific Ocean, deployed with E-Obs tags and archived in Movebank.
 
 frigatebird_tracks_cleaned.rds
@@ -81,42 +62,35 @@ Contents: A dataframe containing timestamped locations (Timestamp, LocationLat, 
 Processing: Unreliable records with missing or duplicated coordinates were removed; timestamps were formatted into POSIXct. No environmental variables are appended yet.
 
 frigatebird_tracks_combined.rds
-Description: This version may combine multiple cleaned GPS datasets from different deployments or tags into a single master file.
+Description: Combined cleaned GPS datasets from multiple birds into one master file.
 
-Contents: A merged dataset of multiple birds with standardized field names and consistent time zones.
+Contents: A merged dataset with standardized fields and time zones.
 
-Purpose: Useful for performing cross-individual comparisons or large-scale spatial analysis.
+Purpose: Enables cross-individual comparisons or population-level analyses.
 
 chlorophyll_download.nc
-Description: A NetCDF file containing daily surface chlorophyll-a concentrations over the spatial and temporal extent of the frigatebird tracks.
+Description: A NetCDF file containing daily surface chlorophyll-a concentrations across the tracking domain.
 
-Source: MODIS Aqua ocean color dataset via the ERDDAP server (erdMBchlamday_LonPM180).
+Source: MODIS Aqua ocean color product via ERDDAP (erdMBchlamday_LonPM180).
 
-Download Method: Downloaded using the rxtracto_3D() function from the rerddapXtracto R package, specifying the bounding box and date range of the bird movements.
+Download Method: Downloaded using the rxtracto_3D() function from rerddapXtracto, using the bounding box and time span of bird movements.
 
-Usage: Used as an input to spatially extract chlorophyll values at each GPS point using the raster::extract() function.
+Usage: Serves as the source for extracting chlorophyll-a values at each GPS coordinate.
 
 frigatebird_tracks_with_chla.rds
-Description: Final enriched tracking dataset, with chlorophyll-a concentrations appended to each bird location.
+Description: Final enriched dataset with chlorophyll-a values appended to each bird tracking location.
 
-Contents: All columns from the cleaned dataset plus a new column: chla (chlorophyll-a concentration at that location and month).
+Contents: All columns from the cleaned tracks plus a new column chla (chlorophyll-a concentration).
 
 Processing Steps:
 
-Each GPS point was matched to a raster layer by month (MonthDate).
+GPS timestamps rounded to monthly resolution (MonthDate)
 
-The chlorophyll value was extracted from the MODIS raster stack (chlorophyll_download.nc) using the bird's latitude and longitude.
+MODIS raster layers matched by date
 
-Results were added to the frigatebird.tracks dataframe.
+Chlorophyll values extracted by coordinate
 
-
-
-
-
-
-
-
-
+Data appended to the original track records
 
 License
 MIT License. See LICENSE.md for details.
@@ -129,5 +103,37 @@ Adapted and maintained by Tanif Howlader
 Acknowledgments
 This workflow is based on materials from the NASA ARSET course:
 "Introduction to the Integration of Animal Tracking and Remote Sensing (Part 2)"
+
+
+
+
+---
+
+## Required R Packages
+
+```r
+library(ggplot2)
+library(dplyr)
+library(viridis)
+library(rerddap)
+library(rerddapXtracto)
+library(raster)
+library(lubridate)
+library(sp)
+
+
+# Install missing packages:
+install.packages(c("ggplot2", "dplyr", "viridis", "raster", "lubridate", "sp"))
+# Use remotes::install_github() if rerddapXtracto is not on CRAN
+
+
+
+
+
+
+
+
+
+
 
 
