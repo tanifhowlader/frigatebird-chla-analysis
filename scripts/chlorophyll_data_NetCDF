@@ -1,0 +1,114 @@
+To check if the chlorophyll data downloaded correctly in R from the NetCDF file (select the file path where this file is located)
+ 
+Step-by-Step Code to Inspect the NetCDF File
+
+# Load required library
+library(ncdf4)
+
+# Open the NetCDF file
+nc_file <- nc_open("C:/Users/Tanif/Downloads/Frigatebird_evars/chlorophyll_download.nc")
+
+# Print metadata (check variable names, dimensions, etc.)
+print(nc_file)
+
+# Check if the chlorophyll variable is present
+chlorophyll_data <- ncvar_get(nc_file, varid = "chlorophyll")
+
+# Print summary stats of the chlorophyll data
+summary(as.vector(chlorophyll_data))
+
+# Optional: check for NA values
+sum(is.na(chlorophyll_data))
+
+# Close the NetCDF file
+nc_close(nc_file)
+
+What this code does
+nc_open() loads the NetCDF file.
+
+print() shows the file's structure (variables, dimensions, attributes).
+
+ncvar_get() extracts the actual chlorophyll data.
+
+summary() gives min, max, mean, etc., so you can verify if data is present and valid.
+
+sum(is.na(...)) checks if the file is empty or contains missing values.
+
+Note: If chlorophyll_data is all NA, your download may have failed or your query extent was outside the dataset's coverage.
+
+
+NetCDF Metadata (print(nc_file))
+The file contains chlorophyll-a data (varid = "chlorophyll") on a 4D grid: [longitude, latitude, altitude, time].
+
+Temporal coverage: June 15, 2022 to March 16, 2023.
+
+Spatial coverage:
+
+Latitude: 3.175° to 7.775°N
+
+Longitude: -164.675° to -159.25°E
+
+Altitude: 0 m (surface ocean)
+
+Units: mg m^-3 (milligrams of chlorophyll-a per cubic meter)
+
+
+Summary of Chlorophyll data
+   Min.     : 0.0084  
+   1st Qu.  : 0.0954  
+   Median   : 0.1138  
+   Mean     : 0.1133  
+   3rd Qu.  : 0.1324  
+   Max.     : 32.2015  
+   NA's     : 3030
+
+Values look realistic: most are low (typical of oligotrophic to mesotrophic oceans), and the max (32.2) might reflect a localized bloom.
+
+Only ~3,030 NAs across the entire 4D grid — not concerning unless they overlap your tracking locations.
+
+
+Check the dimensions of the chlorophyll Array 
+dim(chl_data)
+
+If you see something like this - [1] 218 185 10
+Then the dimensions are:
+
+Longitude = 218
+
+Latitude = 185
+
+Time = 10
+
+This means the array is 3D: [lon, lat, time] — and no altitude layer is present, even though it’s technically listed in the metadata.
+
+Extract the First Time Slice 
+
+# Extract the first time slice: [lon, lat, time]
+chl_slice <- chl_data[,,1]
+
+# Get dimension values
+lons <- ncvar_get(nc_file, "longitude")
+lats <- ncvar_get(nc_file, "latitude")
+
+# Close the file
+nc_close(nc_file)
+
+# Prepare data for plotting
+chl_df <- expand.grid(lon = lons, lat = lats)
+chl_df$chl <- as.vector(chl_slice)
+
+# Remove NAs
+chl_df <- na.omit(chl_df)
+
+# Plot with ggplot2
+library(ggplot2)
+ggplot(chl_df, aes(x = lon, y = lat, fill = log(chl))) +
+  geom_tile() +
+  scale_fill_viridis_c(name = "log(Chl-a)") +
+  coord_fixed() +
+  theme_minimal() +
+  labs(title = "Chlorophyll-a Concentration (First Time Slice)",
+       x = "Longitude", y = "Latitude")
+
+
+
