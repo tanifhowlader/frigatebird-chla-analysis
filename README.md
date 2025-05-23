@@ -45,30 +45,31 @@ This project enriches GPS tracking data of frigatebirds with satellite-derived e
 # Output
 
 Map of all frigatebird tracks by individual bird ID
+
 Chlorophyll-a concentration overlaid on a selected track, highlighting productivity zones
 
 
-## Data Description
-# Raw Data Source
+# Data Description
+## Raw Data Source
 All frigatebird tracking data originate from:
 Movebank: DataOne Repository – 10.24431/rw1k8ez
-This dataset includes GPS tracking of Great Frigatebirds (Fregata minor) in the Pacific Ocean, deployed with E-Obs tags and archived in Movebank.
+This dataset includes GPS tracking of Great Frigatebirds (Fregata minor) in the Pacific Ocean, deployed with E-Obs tags and archived in Movebank
 
-# frigatebird_tracks_cleaned.rds
+## frigatebird_tracks_cleaned.rds
 Description: Cleaned version of the raw GPS data from the Movebank archive.
 
 Contents: A dataframe containing timestamped locations (Timestamp, LocationLat, LocationLong) and metadata (e.g., TagLocalIdentifier).
 
 Processing: Unreliable records with missing or duplicated coordinates were removed; timestamps were formatted into POSIXct. No environmental variables are appended yet.
 
-#  frigatebird_tracks_combined.rds
+##  frigatebird_tracks_combined.rds
 Description: Combined cleaned GPS datasets from multiple birds into one master file.
 
 Contents: A merged dataset with standardized fields and time zones.
 
 Purpose: Enables cross-individual comparisons or population-level analyses.
 
-#  chlorophyll_download.nc
+##  chlorophyll_download.nc
 Description: A NetCDF file containing daily surface chlorophyll-a concentrations across the tracking domain.
 
 Source: MODIS Aqua ocean color product via ERDDAP (erdMBchlamday_LonPM180).
@@ -77,12 +78,12 @@ Download Method: Downloaded using the rxtracto_3D() function from rerddapXtracto
 
 Usage: Serves as the source for extracting chlorophyll-a values at each GPS coordinate.
 
-#  frigatebird_tracks_with_chla.rds
+##  frigatebird_tracks_with_chla.rds
 Description: Final enriched dataset with chlorophyll-a values appended to each bird tracking location.
 
 Contents: All columns from the cleaned tracks plus a new column chla (chlorophyll-a concentration).
 
-#  Processing Steps:
+##  Processing Steps:
 
 GPS timestamps rounded to monthly resolution (MonthDate)
 
@@ -97,6 +98,7 @@ MIT License. See LICENSE.md for details.
 
 Contact
 Developed for NASA ARSET training by Morgan Gilmour
+
 Adapted and maintained by Tanif Howlader
 📧 Email: tanifhowlader@trentu.ca
 
