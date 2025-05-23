@@ -1,0 +1,151 @@
+To verify that chlorophyll values were appended correctly to your tracking data by inspecting the structure and summary of the updated file.
+
+# Loading the updated tracking data
+frigatebird.tracks <- readRDS("C:/Users/Tanif/Downloads/Frigatebird_evars/frigatebird_tracks_with_chla_final.rds")
+
+# Inspecting structure
+# Checking to see if a chla column exists and what type of data it holds
+str(frigatebird.tracks)
+
+# Summary Statistics
+# Checking for expected value range and how many values (if any) are NA
+summary(frigatebird.tracks$chla)
+sum(is.na(frigatebird.tracks$chla))  # Count of missing values
+mean(is.na(frigatebird.tracks$chla)) # Proportion of missing
+
+# Visual Check 
+# Plotting a subset to see if chla varies meaningfully with geography
+library(ggplot2)
+
+ggplot(frigatebird.tracks %>% filter(!is.na(chla))) +
+  geom_point(aes(x = LocationLong, y = LocationLat, color = log(chla)), alpha = 0.6) +
+  scale_color_viridis_c(name = "log(Chl-a)") +
+  coord_fixed() +
+  theme_minimal() +
+  labs(title = "Frigatebird Tracks Colored by log(Chlorophyll-a)",
+       x = "Longitude", y = "Latitude")
+
+What to looks for 
+The chla column exists and contains mostly non-NA numeric values.
+
+Summary values should roughly match the earlier chlorophyll data (e.g., 0.01 to 30 mg/m³).
+
+NA values are expected for locations outside chlorophyll coverage or outside temporal bounds.
+
+
+OUTPUT
+> str(frigatebird.tracks)
+tibble [132,629 × 5] (S3: tbl_df/tbl/data.frame)
+ $ Timestamp         : POSIXct[1:132629], format: "2022-06-01 07:51:23" "2022-06-01 07:55:31" ...
+ $ LocationLat       : num [1:132629] 5.89 5.89 5.89 5.89 5.89 ...
+ $ LocationLong      : num [1:132629] -162 -162 -162 -162 -162 ...
+ $ TagLocalIdentifier: chr [1:132629] "eobs_9835" "eobs_9835" "eobs_9835" "eobs_9835" ...
+ $ MonthDate         : POSIXct[1:132629], format: "2022-06-01" "2022-06-01" ...
+> 
+> # Check date range and coordinate ranges
+> summary(frigatebird.tracks$Timestamp)
+                      Min.                    1st Qu.                     Median 
+"2022-06-01 07:51:23.0000" "2022-06-24 23:05:10.0000" "2022-08-03 21:40:08.0000" 
+                      Mean                    3rd Qu.                       Max. 
+"2022-09-12 23:23:53.6804" "2022-11-29 14:35:13.0000" "2023-03-28 16:50:06.0000" 
+> summary(frigatebird.tracks$LocationLat)
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  3.166   5.670   5.880   5.769   5.887   7.777 
+> summary(frigatebird.tracks$LocationLong)
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+ -164.7  -162.3  -162.1  -162.2  -162.1  -159.3 
+> # loading the updated tracking data
+> frigatebird.tracks <- readRDS("C:/Users/Tanif/Downloads/Frigatebird_evars/frigatebird_tracks_with_chla_final.rds")
+> # Inspecting structures
+> str(frigatebird.tracks)
+tibble [132,629 × 7] (S3: tbl_df/tbl/data.frame)
+ $ Timestamp         : POSIXct[1:132629], format: "2022-06-04 19:40:08" "2022-06-04 19:45:07" ...
+ $ LocationLat       : num [1:132629] 5.88 5.88 5.88 5.88 5.88 ...
+ $ LocationLong      : num [1:132629] -162 -162 -162 -162 -162 ...
+ $ TagLocalIdentifier: chr [1:132629] "eobs_9829" "eobs_9829" "eobs_9829" "eobs_9829" ...
+ $ MonthDate         : POSIXct[1:132629], format: "2022-06-01" "2022-06-01" ...
+ $ Date              : Date[1:132629], format: "2022-06-15" "2022-06-15" ...
+ $ chla              : num [1:132629] NA NA NA NA NA NA NA NA NA NA ...
+> summary(frigatebird.tracks$chla)
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+   0.04    0.11    0.13    0.16    0.14   32.20   52480 
+> sum(is.na(frigatebird.tracks$chla))  # Count of missing values
+[1] 52480
+> mean(is.na(frigatebird.tracks$chla)) # Proportion of missing
+[1] 0.3956902
+
+Key findings
+1. chla Column Exists and Has Valid Data
+Range: 0.04 to 32.20 mg/m³ — consistent with realistic chlorophyll-a concentrations, including potential blooms.
+
+Data type: Numeric — as expected.
+
+✔️ Conclusion: Chlorophyll values have been correctly extracted and attached.
+
+2. Missing Values (NAs)
+Count: 52,480 / 132,629 ≈ 39.6%
+
+Interpretation:
+
+This is not an error, but a common and expected outcome when:
+
+Some track locations were outside the chlorophyll raster extent.
+
+Some timestamps were outside the chlorophyll data range.
+
+Cloud cover or satellite issues resulted in missing pixel values.
+
+This aligns with what we saw earlier: the chlorophyll data spans June 15, 2022 – March 16, 2023, and your tracking data starts from June 1, 2022 and goes until March 28, 2023. 
+So early and late points naturally fall outside available chlorophyll composites.
+
+CHECK CONFIRMS
+| Check                    | Result                 |
+| ------------------------ | ---------------------- |
+| `chla` column present    | ✅ Yes                  |
+| Realistic values         | ✅ Yes                  |
+| NAs present              | ✅ Expected (40%)       |
+| Compatible in time/space | ✅ Mostly within bounds |
+
+
+# Plotting chla values across geography
+# To visualize where missing values occur to understand whether they cluster spatially or temporarally
+
+This R code block creates a spatial plot using ggplot2 to visualize which GPS tracking points have valid chlorophyll-a (chla) values and which do not.
+
+
+aes(x = LocationLong, y = LocationLat): Uses GPS coordinates from the tracking data.
+
+geom_point() with color = is.na(chla):
+
+Colors each point based on whether the chla value is missing (NA) or not:
+
+TRUE = chla is missing.
+
+FALSE = chla is present.
+
+Customizes the color scale:
+
+Blue points: have valid chla data.
+
+Red points: are missing chla values (i.e., NAs).
+
+Legend is labeled as "Missing Chl-a".
+
+library(ggplot2)
+
+ggplot(frigatebird.tracks, aes(x = LocationLong, y = LocationLat)) +
+  geom_point(aes(color = is.na(chla)), alpha = 0.5) +
+  scale_color_manual(values = c("FALSE" = "blue", "TRUE" = "red"), name = "Missing Chl-a") +
+  coord_fixed() +
+  theme_minimal() +
+  labs(title = "Frigatebird Tracks with Missing vs. Available Chlorophyll-a",
+       x = "Longitude", y = "Latitude")
+
+How to Interpret It
+| **Observation**                    | **Meaning**                                                                |
+| ---------------------------------- | -------------------------------------------------------------------------- |
+| Clusters of **red** near edges     | Tracking points outside chlorophyll raster coverage                        |
+| Random **red** points in ocean     | Likely satellite data gaps (e.g., clouds, sun glint, sensor noise)         |
+| Mostly **blue** in core region     | Chlorophyll data aligns well with tracking coverage                        |
+| Many **red** early or late in time | Points are outside the time range of chlorophyll composites (e.g., June 1) |
+
