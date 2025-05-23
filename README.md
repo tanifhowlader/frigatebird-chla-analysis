@@ -78,20 +78,27 @@ Download Method: Downloaded using the rxtracto_3D() function from rerddapXtracto
 
 Usage: Serves as the source for extracting chlorophyll-a values at each GPS coordinate.
 
-##  frigatebird_tracks_with_chla.rds
-Description: Final enriched dataset with chlorophyll-a values appended to each bird tracking location.
+##  frigatebird_tracks_with_chla_final.rds
+Description:
+This dataset contains enriched frigatebird tracking data with corresponding chlorophyll-a concentrations extracted from MODIS satellite imagery. Each tracking point includes environmental context based on its location and date.
 
-Contents: All columns from the cleaned tracks plus a new column chla (chlorophyll-a concentration).
+Contents:
+Includes all fields from the cleaned tracking dataset, along with an additional column:
 
-##  Processing Steps:
+chla – Chlorophyll-a concentration (mg/m³) at each GPS location.
 
-GPS timestamps rounded to monthly resolution (MonthDate)
+Processing Workflow:
+Timestamp Processing:
+GPS timestamps were rounded to the first day of each month and stored in the MonthDate column to match the temporal resolution of the chlorophyll dataset.
 
-MODIS raster layers matched by date
+Satellite Data Matching:
+MODIS chlorophyll-a raster layers were selected based on the corresponding MonthDate values.
 
-Chlorophyll values extracted by coordinate
+Spatial Extraction:
+For each GPS coordinate, chlorophyll-a values were extracted from the raster layer covering that location and date.
 
-Data appended to the original track records
+Data Integration:
+Extracted chlorophyll-a values were merged into the original track dataset to provide environmental context for movement analysis.
 
 
 
