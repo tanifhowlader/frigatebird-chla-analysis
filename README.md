@@ -93,16 +93,19 @@ Chlorophyll values extracted by coordinate
 
 Data appended to the original track records
 
-License
+
+
+# License
+
 MIT License. See LICENSE.md for details.
 
-Contact
+# Contact
 Developed for NASA ARSET training by Morgan Gilmour
 
 Adapted and maintained by Tanif Howlader
 📧 Email: tanifhowlader@trentu.ca
 
-Acknowledgments
+# Acknowledgments
 This workflow is based on materials from the NASA ARSET course:
 "Introduction to the Integration of Animal Tracking and Remote Sensing (Part 2)"
 
