@@ -1,0 +1,90 @@
+This script based on a NASA ARSET tutorial, performs a full pipeline for enriching animal tracking data with remotely sensed 
+environmental information — specifically, appending chlorophyll-a concentrations to each frigatebird GPS location using spatiotemporal nearest-neighbor matching.
+
+# Purpose
+
+Append MODIS-derived chlorophyll-a values to frigatebird GPS tracking points, using:
+
+Temporal matching to the closest chlorophyll observation date
+
+Spatial nearest-neighbor matching based on geographic proximity
+
+# Loading Required Packages
+
+library(dplyr)        # Data manipulation
+library(lubridate)    # Date handling
+library(FNN)          # Fast nearest-neighbor search
+library(ggplot2)      # Visualization
+
+Loading Input Data
+
+frigatebird.tracks <- readRDS(".../frigatebird_tracks_with_chla.rds")
+
+Loads your GPS tracking data.
+
+Assumes a separate data frame chl_tidy is already available, created using rerddapXtracto::tidy_grid(), containing chlorophyll data with columns: longitude, latitude, Date, and chlorophyll.
+
+
+# Alligning Each GPS Timestamp to the Nearest Chlorophyll Date
+
+mutate(Date = chl_dates[which.min(abs(as.numeric(as.Date(Timestamp) - chl_dates)))])
+
+Finds the closest available chlorophyll-a date to each GPS point.
+
+Stores this as a new Date column, enabling exact temporal joins.
+
+# Filtering and Sorting Datasets for Matching
+
+track_filtered <- ... 
+chl_filtered <- ...
+
+Ensures that only matching dates are retained.
+
+Sorts the data to maintain consistent indexing for later merging.
+
+# Nearest-Neighbor Matching (Spatial Join)
+nn_idx <- get.knnx(data = chl_coords, query = track_coords, k = 1)$nn.index
+
+For each date:
+
+Extracts bird and chlorophyll coordinates for that day.
+
+Finds the nearest chlorophyll grid cell (in space) using fast k-nearest neighbors (k = 1).
+
+Appends the corresponding chlorophyll value to each GPS point.
+
+# Merging Back into Original Dataset
+frigatebird.tracks$chla[track_rows] <- track_filtered$chla
+Inserts matched chla values into the full tracking dataset.
+
+
+# Checking and Saving Output
+
+summary(frigatebird.tracks$chla)
+saveRDS(frigatebird.tracks, "frigatebird_tracks_with_chla_final.rds")
+
+Confirms the presence and distribution of chlorophyll values.
+
+Saves the enriched dataset for future use.
+
+# Optional Visualization
+
+ggplot(...) + facet_wrap(~ TagLocalIdentifier)
+
+Creates a faceted scatterplot of bird locations, colored by log-transformed chlorophyll-a.
+
+Helps visualize how bird behavior relates to ocean productivity.
+
+
+
+frigatebird.tracks$chla[track_rows] <- track_filtered$chla
+
+
+
+
+WHY THIS WORKFLOW MATTERS
+Enables spatiotemporal integration of biological and environmental data.
+
+Provides a foundation for habitat modeling, behavioral ecology, or climate response analysis.
+
+The nearest-neighbor approach allows environmental context to be added without requiring raster extraction tools.
