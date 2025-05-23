@@ -48,7 +48,8 @@ library(sp)
 install.packages(c("ggplot2", "dplyr", "viridis", "raster", "lubridate", "sp"))
 # Use remotes::install_github() if rerddapXtracto is not on CRAN
 
-Workflow Overview
+## Workflow Overview
+
 | Step | Description                                                         |
 | ---- | ------------------------------------------------------------------- |
 | 1    | Load cleaned GPS tracking data                                      |
@@ -60,13 +61,13 @@ Workflow Overview
 | 7    | Save enriched dataset and visualize                                 |
 
 
-Output
+# Output
 
 Map of all frigatebird tracks by individual bird ID
 Chlorophyll-a concentration overlaid on a selected track, highlighting productivity zones
 
 
-📁 Data Description
+## Data Description
 Raw Data Source
 All frigatebird tracking data originate from:
 Movebank: DataOne Repository - 10.24431/rw1k8ez
