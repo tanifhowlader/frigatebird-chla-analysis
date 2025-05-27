@@ -1,142 +1,172 @@
-# frigatebird-chla-analysis
-Using chlorophyll-a data with GPS tracks of frigatebirds using MODIS and ERDDAP in R
+# **Frigatebird Movement and Environmental Covariates Analysis**
 
-
-# Frigatebird Movement and Chlorophyll-a Integration
-
-This project enriches GPS tracking data of frigatebirds with satellite-derived environmental data—specifically **chlorophyll-a concentration**—to explore the ecological drivers of seabird behavior over time and space. The workflow was developed for training purposes in NASA's ARSET program and is compatible with MODIS Aqua daily chlorophyll datasets accessed via ERDDAP.
+This repository contains the full **analysis workflow** for linking frigatebird GPS tracking data with remotely sensed environmental variables, including **chlorophyll-a concentration** and **bathymetric depth**. The project uses R and open-source spatial packages to understand how marine top predators interact with oceanographic features across the central Pacific Ocean.
 
 ---
 
-## Objectives
+## 📂 **Repository Structure**
 
-- Download chlorophyll-a data from the ERDDAP server (MODIS Aqua, daily).
-- Match remotely sensed data with animal tracking locations based on space and time.
-- Visualize enriched tracks to explore ecological patterns.
-- Create a reusable and reproducible workflow using open data and R.
-
----
-
-## Data Sources
-
-### 1. **Frigatebird Tracking Data**
-- Format: `.rds`
-- Contents: Cleaned GPS telemetry (timestamp, lat/lon, bird ID)
-- Source: Provided externally, not included due to data privacy
-
-### 2. **Chlorophyll-a Concentration**
-- Source: MODIS Aqua daily product via ERDDAP
-- Dataset ID: `erdMBchlamday_LonPM180`
-- Accessed via `rerddap` and `rerddapXtracto` packages
-
-## Workflow Overview
-
-| Step | Description                                                         |
-| ---- | ------------------------------------------------------------------- |
-| 1    | Load cleaned GPS tracking data                                      |
-| 2    | Define spatial and temporal extents                                 |
-| 3    | Download and process chlorophyll-a from ERDDAP                      |
-| 4    | Create a raster stack of chlorophyll data                           |
-| 5    | Match track points to environmental conditions by date and location |
-| 6    | Append chlorophyll-a values to each GPS point                       |
-| 7    | Save enriched dataset and visualize                                 |
-
-
-# Output
-
-Map of all frigatebird tracks by individual bird ID
-
-Chlorophyll-a concentration overlaid on a selected track, highlighting productivity zones
-
-
-# Data Description
-## Raw Data Source
-All frigatebird tracking data originate from:
-Movebank: DataOne Repository – 10.24431/rw1k8ez
-This dataset includes GPS tracking of Great Frigatebirds (Fregata minor) in the Pacific Ocean, deployed with E-Obs tags and archived in Movebank
-
-## frigatebird_tracks_cleaned.rds
-Description: Cleaned version of the raw GPS data from the Movebank archive.
-
-Contents: A dataframe containing timestamped locations (Timestamp, LocationLat, LocationLong) and metadata (e.g., TagLocalIdentifier).
-
-Processing: Unreliable records with missing or duplicated coordinates were removed; timestamps were formatted into POSIXct. No environmental variables are appended yet.
-
-##  frigatebird_tracks_combined.rds
-Description: Combined cleaned GPS datasets from multiple birds into one master file.
-
-Contents: A merged dataset with standardized fields and time zones.
-
-Purpose: Enables cross-individual comparisons or population-level analyses.
-
-##  chlorophyll_download.nc
-Description: A NetCDF file containing daily surface chlorophyll-a concentrations across the tracking domain.
-
-Source: MODIS Aqua ocean color product via ERDDAP (erdMBchlamday_LonPM180).
-
-Download Method: Downloaded using the rxtracto_3D() function from rerddapXtracto, using the bounding box and time span of bird movements.
-
-Usage: Serves as the source for extracting chlorophyll-a values at each GPS coordinate.
-
-##  frigatebird_tracks_with_chla_final.rds
-Description:
-This dataset contains enriched frigatebird tracking data with corresponding chlorophyll-a concentrations extracted from MODIS satellite imagery. Each tracking point includes environmental context based on its location and date.
-
-Contents:
-Includes all fields from the cleaned tracking dataset, along with an additional column:
-
-chla – Chlorophyll-a concentration (mg/m³) at each GPS location.
-
-Processing Workflow:
-Timestamp Processing:
-GPS timestamps were rounded to the first day of each month and stored in the MonthDate column to match the temporal resolution of the chlorophyll dataset.
-
-Satellite Data Matching:
-MODIS chlorophyll-a raster layers were selected based on the corresponding MonthDate values.
-
-Spatial Extraction:
-For each GPS coordinate, chlorophyll-a values were extracted from the raster layer covering that location and date.
-
-Data Integration:
-Extracted chlorophyll-a values were merged into the original track dataset to provide environmental context for movement analysis.
-
-
-
-# License
-
-MIT License. See LICENSE.md for details.
-
-# Contact
-Developed for NASA ARSET training by Morgan Gilmour
-
-Adapted and maintained by Tanif Howlader
-📧 Email: tanifhowlader@trentu.ca
-
-# Acknowledgments
-This workflow is based on materials from the NASA ARSET course:
-"Introduction to the Integration of Animal Tracking and Remote Sensing (Part 2)"
-
-
-
+```
+frigatebird-analysis/
+├── data/
+│   ├── frigatebird_tracks_cleaned.rds
+│   ├── bathymetry_data.rds
+├── scripts/
+│   ├── chlorophyll_extraction.R
+│   ├── bathymetry_download.R
+│   ├── density_and_ppm_model.R
+│   ├── bathymetric_profile_plot.R
+├── figures/
+│   ├── example_map.png
+│   ├── profile_plot.png
+├── docs/
+│   ├── index.html  # For GitHub Pages
+├── README.md
+├── LICENSE
+├── .gitignore
+```
 
 ---
 
-## Required R Packages
+## 📜 **Project Description**
 
-```r
-library(ggplot2)
-library(dplyr)
-library(viridis)
-library(rerddap)
-library(rerddapXtracto)
-library(raster)
-library(lubridate)
-library(sp)
+This project investigates how **frigatebirds** use marine environments, particularly focusing on their spatial association with:
 
+* **Surface ocean productivity** (via satellite-derived chlorophyll-a)
+* **Bathymetric features** (deep trenches, shallow ridges, slopes)
 
-# Install missing packages:
-install.packages(c("ggplot2", "dplyr", "viridis", "raster", "lubridate", "sp"))
-# Use remotes::install_github() if rerddapXtracto is not on CRAN
+We combine **point process models**, **kernel density estimation**, and **spatial visualizations** to explore habitat use patterns, identify migration corridors, and assess individual variability.
+
+---
+
+## ⚙ **Requirements**
+
+* **R** (≥4.2)
+* **R packages**:
+
+  ```r
+  install.packages(c("marmap", "spatstat", "sf", "ggplot2", "dplyr", "rerddapXtracto", "ncdf4"))
+  ```
+
+---
+
+## 📈 **How to Reproduce**
+
+```bash
+# Clone repository
+$ git clone https://github.com/yourusername/frigatebird-analysis.git
+
+# Navigate to project directory
+$ cd frigatebird-analysis
+
+# Open R and run scripts in /scripts sequentially
+```
+
+Outputs (figures, models) will be saved to `/figures`.
+
+---
+
+## 📄 **License**
+
+This project is licensed under the **MIT License** — see the `LICENSE` file for details.
+
+---
+
+## 🌐 **GitHub Pages Site**
+
+The project website is available at:
+
+```
+https://yourusername.github.io/frigatebird-analysis/
+```
+
+To deploy:
+
+1. Render Quarto or RMarkdown outputs to HTML into `/docs`.
+2. Go to **Settings → Pages → Source → `main` branch → /docs folder**.
+3. Save and publish.
+
+---
+
+## 📋 **.gitignore**
+
+```
+# R-related
+.Rhistory
+.Rproj.user
+.RData
+.Ruserdata
+.Rproj
+
+# Data files
+*.rds
+*.csv
+*.zip
+*.tar.gz
+
+# System files
+.DS_Store
+```
+
+---
+
+## 📝 **Quarto Starter File (index.qmd)**
+
+```markdown
+---
+title: "Frigatebird Movement and Oceanographic Drivers"
+author: "Your Name"
+date: "2025-06-01"
+format:
+  html:
+    toc: true
+    toc-depth: 2
+    theme: cosmo
+    code-fold: true
+---
+
+# **Abstract**
+
+This report summarizes analyses linking frigatebird tracking data with oceanographic covariates, focusing on spatial patterns, density, and environmental associations.
+
+# **Introduction**
+
+_Provide background on why this analysis matters._
+
+# **Data and Methods**
+
+## **Tracking Data**
+Describe data source, number of points, time range, preprocessing.
+
+## **Environmental Covariates**
+List chlorophyll-a extraction, bathymetry download, spatial matching.
+
+## **Analysis Methods**
+Point process models, density estimation, cross-section profiles.
+
+# **Results**
+
+## **Density Maps**
+Insert maps, describe patterns.
+
+## **Environmental Models**
+Summarize model outputs, coefficients, significance.
+
+## **Individual Variability**
+Highlight differences between birds.
+
+# **Discussion**
+
+Discuss ecological interpretations, limitations, and next steps.
+
+# **References**
+
+_Add citations and data sources._
+```
+
+---
+
+✅ Let me know if you want me to generate these as ready-to-use files and bundle them into a push-ready GitHub package!
 
 
 
